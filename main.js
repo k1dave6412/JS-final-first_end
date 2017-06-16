@@ -84,26 +84,50 @@ var cursor = {
     y: 0,
 }
 
-// tower cursor
-var tower = {
-    x: 0,
-    y: 0,
-    range: 96,
-    aimingEnemyId: null,
-    searchEnemy: function() {
-        for (var i = 0; i < enemies.length; i++) {
-            var distance = Math.sqrt(
-                Math.pow(this.x - enemies[i].x, 2) + Math.pow(this.y - enemies[i].y, 2)
-            );
-            if (distance <= this.range) {
-                this.aimingEnemyId = i;
-                return;
-            }
-        }
+// tower Class
+function Tower() {
+    this.x = 0;
+    this.y = 0;
+    this.range = 96;
+    this.aimingEnemyId = null;
+    this.searchEnemy = function() {
+            this.CD -= 1 / FPS;
 
-        this.aimingEnemyId = null;
-    }
+            for (var i = 0; i < enemies.length; i++) {
+                var distance = Math.sqrt(
+                    Math.pow(this.x - enemies[i].x, 2) + Math.pow(this.y - enemies[i].y, 2)
+                );
+                if (distance <= this.range) {
+                    this.aimingEnemyId = i;
+                    if (this.CD <= 0) {
+                        this.shoot();
+                        this.CD = this.fireRate;
+                    }
+                    return;
+                }
+            }
+
+            this.aimingEnemyId = null;
+        },
+        this.shoot = function() {
+            var id = this.aimingEnemyId;
+
+            //draw line
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(enemies[id].x, enemies[id].y);
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            enemies[id].HP -= this.damage;
+        };
+    this.fireRate = 1;
+    this.CD = 1;
+    this.damage = 5;
 }
+var tower = new Tower();
+var towers = [];
 
 // isBuilding
 var isBuilding = false;
@@ -114,8 +138,10 @@ var FPS = 24;
 //clocks
 var clocks = 0;
 
-//HP
+//HP, Score, Money
 var HP = 100;
+var Score = 0;
+var Money = 10;
 ctx.font = "36px Arial";
 ctx.fillStyle = "white";
 
@@ -129,15 +155,23 @@ function draw() {
 
     if (isBuilding) {
         ctx.drawImage(towerImg, cursor.x, cursor.y)
-    } else {
-        ctx.drawImage(towerImg, tower.x, tower.y)
+    }
+
+    for (var i = 0; i < towers.length; i++) {
+        ctx.drawImage(towerImg, towers[i].x, towers[i].y)
+        towers[i].searchEnemy();
     }
 
     // move and draw all enemies
     for (var i = 0; i < enemies.length; i++) {
         //HP-10 if enemies arrived
         if (enemies[i].HP <= 0) {
-            HP = HP - 10;
+            if (enemies[i].pathDes == enemyPath.length) {
+                HP = HP - 10;
+            } else {
+                Score += 10;
+                Money += 10;
+            }
             enemies.splice(i, 1);
         } else {
             ctx.drawImage(enemyImg, enemies[i].x, enemies[i].y);
@@ -151,11 +185,13 @@ function draw() {
         enemies.push(newEnemy);
     }
 
-    //HP TEXT
+    //HP ,Score, Money TEXT
     ctx.fillText("HP: " + HP, 15 + 0, 15 + 0 + 36);
+    ctx.fillText("Score: " + Score, 15 + 0, 15 + 0 + 36 + 36);
+    ctx.fillText("Money: " + Money, 15 + 0, 15 + 0 + 36 + 36 + 36);
 
     //aimingEnemy
-    tower.searchEnemy();
+
     if (tower.aimingEnemyId != null) {
         var id = tower.aimingEnemyId;
         ctx.drawImage(aimingImg, enemies[id].x, enemies[id].y);
@@ -184,9 +220,14 @@ $("#canvas").on("click",
         if (event.offsetX > 640 - 32 * 2 && event.offsetY > 480 - 32 * 2) {
             isBuilding = !isBuilding;
         } else if (isBuilding) {
-            tower.x = cursor.x;
-            tower.y = cursor.y;
-            isBuilding = false;
+            if (Money >= 10) {
+                var newTower = new Tower();
+                newTower.x = cursor.x;
+                newTower.y = cursor.y;
+                towers.push(newTower);
+                isBuilding = false;
+                Money -= 10;
+            }
         }
     }
 );
