@@ -14,6 +14,10 @@ characterImg.src = "images/jason.gif"
 var enemyImg = document.createElement("img");
 enemyImg.src = "images/slime.gif"
 
+//aiming
+var aimingImg = document.createElement("img");
+aimingImg.src = "images/crosshair.png"
+
 // building button
 var buildImg = document.createElement("img");
 buildImg.src = "images/tower-btn.png"
@@ -27,6 +31,7 @@ towerImg.src = "images/tower.png";
 function Enemy() {
     this.x = 32 * 3;
     this.y = 480 - 32;
+    this.HP = 10;
 
     this.pathDes = 0;
     this.speedX = 0;
@@ -50,6 +55,7 @@ function Enemy() {
                     this.speedY = -64;
                 }
             } else {
+                this.HP = 0;
                 this.speedX = 0;
                 this.speedY = 0;
             }
@@ -82,6 +88,21 @@ var cursor = {
 var tower = {
     x: 0,
     y: 0,
+    range: 96,
+    aimingEnemyId: null,
+    searchEnemy: function() {
+        for (var i = 0; i < enemies.length; i++) {
+            var distance = Math.sqrt(
+                Math.pow(this.x - enemies[i].x, 2) + Math.pow(this.y - enemies[i].y, 2)
+            );
+            if (distance <= this.range) {
+                this.aimingEnemyId = i;
+                return;
+            }
+        }
+
+        this.aimingEnemyId = null;
+    }
 }
 
 // isBuilding
@@ -92,6 +113,12 @@ var FPS = 24;
 
 //clocks
 var clocks = 0;
+
+//HP
+var HP = 100;
+ctx.font = "36px Arial";
+ctx.fillStyle = "white";
+
 
 
 function draw() {
@@ -108,8 +135,14 @@ function draw() {
 
     // move and draw all enemies
     for (var i = 0; i < enemies.length; i++) {
-        ctx.drawImage(enemyImg, enemies[i].x, enemies[i].y);
-        enemies[i].move();
+        //HP-10 if enemies arrived
+        if (enemies[i].HP <= 0) {
+            HP = HP - 10;
+            enemies.splice(i, 1);
+        } else {
+            ctx.drawImage(enemyImg, enemies[i].x, enemies[i].y);
+            enemies[i].move();
+        }
     };
 
     // produce enemy per 80 ticks
@@ -118,6 +151,15 @@ function draw() {
         enemies.push(newEnemy);
     }
 
+    //HP TEXT
+    ctx.fillText("HP: " + HP, 15 + 0, 15 + 0 + 36);
+
+    //aimingEnemy
+    tower.searchEnemy();
+    if (tower.aimingEnemyId != null) {
+        var id = tower.aimingEnemyId;
+        ctx.drawImage(aimingImg, enemies[id].x, enemies[id].y);
+    }
 
 }
 
