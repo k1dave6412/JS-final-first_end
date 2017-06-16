@@ -23,26 +23,35 @@ var towerImg = document.createElement("img");
 towerImg.src = "images/tower.png";
 
 
-//enemy objects
+// enemy objects
 var enemy = {
     x: 32 * 3,
     y: 480 - 32,
+    speedX: 0,
+    speedY: -64,
+    move: function move() {
+        this.x = this.x + this.speedX / FPS;
+        this.y = this.y + this.speedY / FPS;
+    },
 };
 
-//cursor get
+// cursor get
 var cursor = {
     x: 0,
     y: 0,
 }
 
-//tower cursor
+// tower cursor
 var tower = {
     x: 0,
     y: 0,
 }
 
-//isBuilding
+// isBuilding
 var isBuilding = false;
+
+// FPS 
+var FPS = 24;
 
 
 function draw() {
@@ -51,12 +60,13 @@ function draw() {
     ctx.drawImage(enemyImg, enemy.x, enemy.y);
     ctx.drawImage(buildImg, 640 - 32 * 2, 480 - 32 * 2, 32 * 2, 32 * 2);
     ctx.drawImage(towerImg, tower.x, tower.y)
+    enemy.move();
 }
 
 // delay loading
 setTimeout(draw, 100);
 // repeat loading
-setInterval(draw, 30)
+setInterval(draw, 1000 / FPS);
 
 //get cursor on canvas
 $("#canvas").on("mousemove",
