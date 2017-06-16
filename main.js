@@ -22,19 +22,11 @@ buildImg.src = "images/tower-btn.png"
 var towerImg = document.createElement("img");
 towerImg.src = "images/tower.png";
 
-
-//enemy objects
-var enemy = {
-    x: 32 * 3,
-    y: 480 - 32,
-};
-
 function draw() {
     ctx.drawImage(bgImg, 0, 0);
     ctx.drawImage(characterImg, 640 - 32, 480 - 32 * 3);
     ctx.drawImage(enemyImg, enemy.x, enemy.y);
     ctx.drawImage(buildImg, 640 - 32 * 2, 480 - 32 * 2, 32 * 2, 32 * 2);
-
 }
 
 // delay loading
