@@ -23,15 +23,15 @@ var towerImg = document.createElement("img");
 towerImg.src = "images/tower.png";
 
 
-// enemy objects
-var enemy = {
-    x: 32 * 3,
-    y: 480 - 32,
+// enemy class
+function Enemy() {
+    this.x = 32 * 3;
+    this.y = 480 - 32;
 
-    pathDes: 0,
-    speedX: 0,
-    speedY: -64,
-    move: function move() {
+    this.pathDes = 0;
+    this.speedX = 0;
+    this.speedY = -64;
+    this.move = function() {
         if (isCollided(this.x, this.y, enemyPath[this.pathDes].x, enemyPath[this.pathDes].y, 64 / FPS, 64 / FPS)) {
             this.pathDes += 1;
             if (this.pathDes !== enemyPath.length) {
@@ -56,8 +56,10 @@ var enemy = {
         }
         this.x += this.speedX / FPS;
         this.y += this.speedY / FPS;
-    },
+    };
 };
+
+var enemies = [];
 
 // enemy nav arrays
 var enemyPath = [
@@ -88,11 +90,14 @@ var isBuilding = false;
 // FPS 
 var FPS = 24;
 
+//clocks
+var clocks = 0;
+
 
 function draw() {
+    clocks++;
     ctx.drawImage(bgImg, 0, 0);
     ctx.drawImage(characterImg, 640 - 32, 480 - 32 * 3);
-    ctx.drawImage(enemyImg, enemy.x, enemy.y);
     ctx.drawImage(buildImg, 640 - 32 * 2, 480 - 32 * 2, 32 * 2, 32 * 2);
 
     if (isBuilding) {
@@ -101,7 +106,19 @@ function draw() {
         ctx.drawImage(towerImg, tower.x, tower.y)
     }
 
-    enemy.move();
+    // move and draw all enemies
+    for (var i = 0; i < enemies.length; i++) {
+        ctx.drawImage(enemyImg, enemies[i].x, enemies[i].y);
+        enemies[i].move();
+    };
+
+    // produce enemy per 80 ticks
+    if (clocks % 80 == 0) {
+        var newEnemy = new Enemy();
+        enemies.push(newEnemy);
+    }
+
+
 }
 
 // delay loading
