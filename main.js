@@ -6,6 +6,7 @@ bgImg.src = "images/map.png";
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
+
 // character jason
 var characterImg = document.createElement("img");
 characterImg.src = "images/jason.gif"
@@ -31,28 +32,28 @@ towerImg.src = "images/tower.png";
 function Enemy() {
     this.x = 32 * 3;
     this.y = 480 - 32;
-    this.HP = 10;
+    this.HP = 10 * Hard;
 
     this.pathDes = 0;
     this.speedX = 0;
-    this.speedY = -64;
+    this.speedY = -64 * Hard;
     this.move = function() {
-        if (isCollided(this.x, this.y, enemyPath[this.pathDes].x, enemyPath[this.pathDes].y, 64 / FPS, 64 / FPS)) {
+        if (isCollided(this.x, this.y, enemyPath[this.pathDes].x, enemyPath[this.pathDes].y, 64 * Hard / FPS, 64 * Hard / FPS)) {
             this.pathDes += 1;
             if (this.pathDes !== enemyPath.length) {
 
                 if (enemyPath[this.pathDes].x > enemyPath[this.pathDes - 1].x) {
-                    this.speedX = 64;
+                    this.speedX = 64 * Hard;
                     this.speedY = 0;
                 } else if (enemyPath[this.pathDes].x < enemyPath[this.pathDes - 1].x) {
-                    this.speedX = -64;
+                    this.speedX = -64 * Hard;
                     this.speedY = 0;
                 } else if (enemyPath[this.pathDes].y > enemyPath[this.pathDes - 1].y) {
                     this.speedX = 0;
-                    this.speedY = 64;
+                    this.speedY = 64 * Hard;
                 } else {
                     this.speedX = 0;
-                    this.speedY = -64;
+                    this.speedY = -64 * Hard;
                 }
             } else {
                 this.HP = 0;
@@ -133,7 +134,7 @@ var towers = [];
 var isBuilding = false;
 
 // FPS 
-var FPS = 24;
+var FPS = 60;
 
 //clocks
 var clocks = 0;
@@ -145,6 +146,16 @@ var Money = 10;
 ctx.font = "36px Arial";
 ctx.fillStyle = "white";
 
+//Hard
+var Hard = 1;
+
+//gameover score
+var gameover = canvas.getContext("2d");
+var yourscore = canvas.getContext("2d");
+gameover.font = "72px Arial";
+yourscore.font = "36px Arial";
+gameover.fillStyle = "white";
+yourscore.fillStyle = "white";
 
 
 function draw() {
@@ -169,8 +180,8 @@ function draw() {
             if (enemies[i].pathDes == enemyPath.length) {
                 HP = HP - 10;
             } else {
-                Score += 10;
-                Money += 10;
+                Score += 10 * Hard;
+                Money += 10 * Hard;
             }
             enemies.splice(i, 1);
         } else {
@@ -185,6 +196,11 @@ function draw() {
         enemies.push(newEnemy);
     }
 
+    if (clocks % 160 * Hard == 0) {
+        Hard++;
+    }
+
+
     //HP ,Score, Money TEXT
     ctx.fillText("HP: " + HP, 15 + 0, 15 + 0 + 36);
     ctx.fillText("Score: " + Score, 15 + 0, 15 + 0 + 36 + 36);
@@ -197,12 +213,18 @@ function draw() {
         ctx.drawImage(aimingImg, enemies[id].x, enemies[id].y);
     }
 
+    if (HP <= 0) {
+        clearInterval(intervalID);
+        gameover.fillText("GAMEOVER", 320, 240);
+        yourscore.fillText("You got " + Score, 320 + 32, 240 + 32);
+    }
+
 }
 
 // delay loading
 setTimeout(draw, 100);
 // repeat loading
-setInterval(draw, 1000 / FPS);
+var intervalID = setInterval(draw, 1000 / FPS);
 
 //get cursor on canvas
 $("#canvas").on("mousemove",
