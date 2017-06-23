@@ -93,6 +93,10 @@ var FPS = 24;
 //clocks
 var clocks = 0;
 
+//HP
+var HP = 100;
+ctx.fillStyle = "white";
+ctx.font = "24px Arial";
 
 function draw() {
     clocks++;
@@ -117,6 +121,8 @@ function draw() {
         var newEnemy = new Enemy();
         enemies.push(newEnemy);
     }
+
+    ctx.fillText("HP: " + HP, 10, 40);
 
 
 }
