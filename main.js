@@ -100,7 +100,7 @@ function Tower() {
                 if (distance <= this.range) {
                     this.aimingEnemyId = i;
                     if (this.CD <= 0) {
-                        this.shoot();
+                        this.shoot(this.aimingEnemyId);
                         this.CD = this.fireRate;
                     }
                     return;
@@ -109,8 +109,7 @@ function Tower() {
 
             this.aimingEnemyId = null;
         },
-        this.shoot = function() {
-            var id = this.aimingEnemyId;
+        this.shoot = function(id) {
 
             //draw line
             ctx.beginPath();
